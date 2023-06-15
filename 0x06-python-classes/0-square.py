@@ -1,7 +1,8 @@
 #!/usr/bin/python3
-class Square:
-	pass
+# 0-square.py by Isaac Odey
+"""Defines a square """
 
-my_square = Square()
-print(type(my_square))
-print(my_square.__dict__)
+
+class Square:
+    """Does nothing"""
+    pass
