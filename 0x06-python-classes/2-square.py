@@ -1,6 +1,7 @@
 #!/usr/bin/python3
-# Size validation by Isaac Odey
+# 0-square.py by Isaac Odey
 """A module that defines a square """
+
 
 class Square:
     """A class that represents a square"""
