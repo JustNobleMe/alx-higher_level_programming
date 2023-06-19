@@ -3,7 +3,7 @@
 
 
 class Rectangel:
-    """A class representing a rectangle"""
+    """a class representing a rectangle"""
 
 
     """Initializing width"""
