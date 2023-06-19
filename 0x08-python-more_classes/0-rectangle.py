@@ -4,7 +4,4 @@
 
 """A class """
 class Rectangle:
-
-
-""" empty instance """
 	pass
