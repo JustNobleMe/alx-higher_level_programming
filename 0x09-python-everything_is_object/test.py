@@ -19,9 +19,17 @@
 
 # print(increment(a))
 
-def increment(n):
-    n.append(4)
+# def increment(n):
+#     n.append(4)
 
-l = [1, 2, 3]
-increment(l)
-print(l)
+# l = [1, 2, 3]
+# increment(l)
+# print(l)
+
+def assign_value(n, v):
+    n = v
+
+l1 = [1, 2, 3]
+l2 = [4, 5, 6]
+assign_value(l1, l2)
+print(l1)
