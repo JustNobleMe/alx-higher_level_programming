@@ -13,7 +13,8 @@
 
 def increment(n):
     n += 1
+    return n
 
 a = 1
-increment(a)
-print(a)
+
+print(increment(a))
