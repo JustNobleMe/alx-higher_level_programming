@@ -23,4 +23,3 @@ if __name__ == '__main__':
 
     for row in rows_selected:
         print(row)
-
