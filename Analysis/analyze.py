@@ -1,5 +1,12 @@
 
 import pandas as pd
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+import math
+
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error, r2_score
 
 df = pd.read_csv('/workspaces/alx-higher_level_programming/Analysis/flights.csv')
 
@@ -82,3 +89,90 @@ arrival_distance_corr = df['ARRIVAL_DELAY'].corr(df['DISTANCE'])
 
 print(f"Correlation between Departure Delay and Distance: {departure_distance_corr}")
 print(f"Correlation between Arrival Delay and Distance: {arrival_distance_corr}")
+
+# Group the data by day of the week (assuming you have a 'day_of_week' column)
+day_of_week_departure_delay = df.groupby('DAY_OF_WEEK')['DEPARTURE_DELAY'].mean()
+print("Average Departure Delay by Day of the Week:")
+print(day_of_week_departure_delay)
+
+# Filter data for positive departure delays
+positive_departure_delay_data = df[df['DEPARTURE_DELAY'] > 0]
+
+# Check correlation between distance and arrival delay for positive departure delays
+distance_arrival_corr = positive_departure_delay_data['DISTANCE'].corr(positive_departure_delay_data['ARRIVAL_DELAY'])
+
+print(f"Correlation between Distance and Arrival Delay for Positive Departure Delays: {distance_arrival_corr}")
+
+
+#SEASONAL MONTH
+
+# Convert the 'month' column to a datetime format
+df['MONTH'] = pd.to_datetime(df['MONTH'], format='mixed')
+
+# Group the data by month and calculate the average departure delay
+monthly_departure_delays = df.groupby(df['MONTH'].dt.month)['DEPARTURE_DELAY'].mean()
+
+# Create a line plot to visualize the seasonal pattern
+plt.figure(figsize=(12, 6))
+monthly_departure_delays.plot(marker='o', linestyle='-')
+plt.xlabel('Month')
+plt.ylabel('Average Departure Delay (minutes)')
+plt.title('Seasonal Pattern of Departure Delays')
+plt.xticks(range(1, 13), ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
+plt.grid(True)
+plt.show()
+
+#REMOVE MISSING COLUMNS
+df = df.dropna(subset=['WEATHER_DELAY'])
+
+# Check for missing values after removal
+missing_values = df.isnull().sum()
+
+
+# Convert categorical variables like 'AIRLINE' into dummy variables (one-hot encoding)
+df = pd.get_dummies(df, columns=['AIRLINE'], drop_first=True)
+
+# Define predictors and target variable
+predictors = ['LATE_AIRCRAFT_DELAY', 'AIR_SYSTEM_DELAY', 'DEPARTURE_DELAY', 'WEATHER_DELAY', 'SECURITY_DELAY', 'DAY_OF_WEEK', 'DISTANCE'] + list(df.columns[df.columns.str.startswith('AIRLINE_')])  # Include one-hot encoded airline columns
+X = df[predictors]
+y = df['ARRIVAL_DELAY']
+
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Create and fit the linear regression model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Make predictions on the test set
+y_pred = model.predict(X_test)
+
+# Evaluate the model
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+# Calculate IQR and define upper and lower bounds for outliers
+Q1 = df['ARRIVAL_DELAY'].quantile(0.25)
+Q3 = df['ARRIVAL_DELAY'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+# Remove outliers
+df = df[(df['ARRIVAL_DELAY'] >= lower_bound) & (df['ARRIVAL_DELAY'] <= upper_bound)]
+
+# Log-transform ARRIVAL_DELAY
+# df['log_ARRIVAL_DELAY'] = df['ARRIVAL_DELAY'].apply(lambda x: math.log1p(x))  # Adding 1 to handle zero values
+
+# # Define predictors and target variable
+# predictors = ['LATE_AIRCRAFT_DELAY', 'AIR_SYSTEM_DELAY', 'DEPARTURE_DELAY', 'WEATHER_DELAY', 'SECURITY_DELAY', 'DAY_OF_WEEK', 'DISTANCE'] + list(df.columns[df.columns.str.startswith('AIRLINE_')])
+
+# # Fit the linear regression model
+# X = df[predictors]
+# y = df['log_ARRIVAL_DELAY']
+# X = sm.add_constant(X)  # Add a constant term (intercept) to the model
+# model = sm.OLS(y, X).fit()
+
+# # Summary of the regression model
+# print(model.summary())
